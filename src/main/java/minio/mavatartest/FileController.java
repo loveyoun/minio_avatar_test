@@ -1,17 +1,12 @@
+package minio.mavatartest;
+
 import io.minio.messages.Bucket;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.List;
-
-import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
 
 @Slf4j
 @RestController
@@ -25,6 +20,7 @@ public class FileController {
     public List<Bucket> listBuckets(){
         return minioService.getAllBuckets();
     }
+
     @GetMapping(value="/file")
     public ResponseEntity<Object> getFiles() {
         return ResponseEntity.ok(minioService.getListObjects());

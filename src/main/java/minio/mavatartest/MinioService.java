@@ -1,3 +1,5 @@
+package minio.mavatartest;
+
 import io.minio.*;
 import io.minio.messages.Bucket;
 import io.minio.messages.Item;
@@ -20,14 +22,25 @@ public class MinioService {
     @Value("${minio.bucket.name}")
     private String bucket;
 
+
+    public List<Bucket> getAllBuckets() {
+        try{
+            return minioClient.listBuckets();
+        } catch(Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
     //from bucket, 목록 객체 가져옴
     public List<FileDTO> getListObjects(){
         List<FileDTO> objects = new ArrayList<>();
         try {
+            //해당 bucket에서 objects list 가져오기
             Iterable<Result<Item>> result = minioClient.listObjects(ListObjectsArgs.builder()
                     .bucket(bucket)
                     .recursive(true)
                     .build());
+            //loop 돌면서
             for (Result<Item> item : result) {
                 objects.add(FileDTO.builder()
                         .filename(item.get().objectName())
@@ -78,15 +91,7 @@ public class MinioService {
     }
 
     private String getPreSignedUrl(String filename){
-        return "http://localhost:8080/file/".concat(filename);
-    }
-
-    public List<Bucket> getAllBuckets() {
-        try{
-            return minioClient.listBuckets();
-        } catch(Exception e){
-            throw new RuntimeException(e.getMessage());
-            }
+        return "http://localhost:9000/browser".concat(filename);
     }
 
 }
