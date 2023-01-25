@@ -91,7 +91,7 @@ public class MinioService {
     }
 
     private String getPreSignedUrl(String filename){
-        return "http://localhost:9000/browser".concat(filename);
+        return "http://localhost:9000/browser/".concat(filename);
     }
 
 }

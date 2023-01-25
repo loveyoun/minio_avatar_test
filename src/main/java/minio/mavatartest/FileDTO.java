@@ -26,8 +26,8 @@ public class FileDTO implements Serializable {
 
     @SuppressWarnings("java:S1948")
     private MultipartFile file;
-    private String url; //http://localhost:8080/{{filename}}
+    private String url;     //http://localhost:9000/{{filename}}
     private Long size;
-    private String filename;    // {{folder name}}/{{file name}}.jpg
+    private String filename;    //{{folder name}}/{{file name}}.jpg
 
 }
