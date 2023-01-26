@@ -15,6 +15,7 @@ public class MinioConfiguration {
     @Value("${minio.access.secret}")
     private String secretKey;
 
+    //Minio server console URL
     @Value("${minio.url}")
     private String minioUrl;
 
@@ -27,6 +28,7 @@ public class MinioConfiguration {
 //        }catch(Exception e){
 //            throw new RuntimeException(e.getMessage());
 //        }
+        //서버에 접근할 수 있도록 Minio Client 객체 생성
         try {
             MinioClient client = new MinioClient.Builder()
                 .credentials(accessKey, secretKey)
