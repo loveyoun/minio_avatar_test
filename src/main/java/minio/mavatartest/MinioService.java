@@ -4,11 +4,20 @@ import io.minio.*;
 import io.minio.messages.Bucket;
 import io.minio.messages.Item;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +31,12 @@ public class MinioService {
     @Value("${minio.bucket.name}")
     private String bucket;
 
+    /*
+    * 기능적 요구사항
+    * 1. 지정된 bucket에 이미지 올리기
+    * 2. 이미지 bytes 받아와서 -> 뿌려주기
+    * 3. 이미지 파일 다운받기
+    */
 
     public List<Bucket> getAllBuckets() {
         try{
@@ -57,19 +72,43 @@ public class MinioService {
     }
 
     public InputStream getObject(String filename) {
-        InputStream stream;
+        InputStream inputStream;
         try {
-            stream = minioClient.getObject(GetObjectArgs.builder()
+            inputStream = minioClient.getObject(GetObjectArgs.builder()
                     .bucket(bucket)
                     .object(filename)
                     .build());
+
+            Image img = ImageIO.read(inputStream);
+            File file = new File("test.jpg");
+            ImageIO.write((RenderedImage) img, "jpg", file);
+
         } catch (Exception e) {
             log.error("Happened error when get list objects from minio: ", e);
             return null;
         }
 
-        return stream;
+
+        return inputStream;
     }
+
+//    public byte[] getFile(String filename) {
+//        try {
+//            //InputStream obj = minioClient.getObject(bucket, defaultBaseFolder + "/" + key);
+//            InputStream obj = minioClient.getObject(GetObjectArgs.builder()
+//                    .bucket(bucket)
+//                    .object(filename)
+//                    .build());
+//
+//            byte[] content = IOUtils.toByteArray(obj);
+//            obj.close();
+//            return content;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+
 
     public Object uploadFile(FileDTO request) {
         try {
@@ -89,6 +128,7 @@ public class MinioService {
                 .filename(request.getFile().getOriginalFilename())
                 .build();
     }
+
 
     private String getPreSignedUrl(String filename){
         return "http://localhost:9000/browser/".concat(filename);
