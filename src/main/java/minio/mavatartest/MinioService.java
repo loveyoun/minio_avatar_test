@@ -1,5 +1,7 @@
 package minio.mavatartest;
 
+import graphql.kickstart.servlet.context.DefaultGraphQLServletContext;
+import graphql.schema.DataFetchingEnvironment;
 import io.minio.*;
 import io.minio.messages.Bucket;
 import io.minio.messages.Item;
@@ -14,16 +16,14 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
-public class MinioService {
+public class MinioService{
 
     @Autowired
     private MinioClient minioClient;
@@ -35,7 +35,8 @@ public class MinioService {
     * 기능적 요구사항
     * 1. 지정된 bucket에 이미지 올리기
     * 2. 이미지 bytes 받아와서 -> 뿌려주기
-    * 3. 이미지 파일 다운받기
+    * 3. 이미지 파일 다운받기* 
+    * 추가고려 사항(4. 중복된 이미지에 대해서 처리, 이미 다운된 이미지에 대해서 덮어쓰기?)
     */
 
     public List<Bucket> getAllBuckets() {
@@ -46,7 +47,7 @@ public class MinioService {
         }
     }
 
-    //from bucket, 목록 객체 가져옴
+    //from bucket, 객체 목록 가져옴
     public List<FileDTO> getListObjects(){
         List<FileDTO> objects = new ArrayList<>();
         try {
@@ -110,6 +111,21 @@ public class MinioService {
 //    }
 
 
+    /**GraphQL로 업로드
+     * public UUID uploadFile2(DataFetchingEnvironment environment) {
+        DefaultGraphQLServletContext context = environment.getContext();
+        context.getFileParts().forEach(
+                part -> {
+                    try {
+                        log.info("uploading: {}, bytes: {}, size: {}", part.getSubmittedFileName(), part.getInputStream(), part.getSize());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        );
+        return UUID.randomUUID();
+    }**/
+
     public Object uploadFile(FileDTO request) {
         try {
             minioClient.putObject(PutObjectArgs.builder()
@@ -117,6 +133,10 @@ public class MinioService {
                     .object(request.getFile().getOriginalFilename())
                     .stream(request.getFile().getInputStream(), request.getFile().getSize(), -1)
                     .build());
+            /*
+            getInputStream() 대신 bytes[], getSize()대신 contents.length
+            ByteArrayInputStream bis = new ByteArrayInputStream(byte[]);
+            * */
         } catch (Exception e) {
             log.error("Happened error when upload file: ", e);
         }
