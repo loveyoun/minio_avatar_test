@@ -17,6 +17,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -126,20 +128,31 @@ public class MinioService{
         return UUID.randomUUID();
     }**/
 
-    public Object uploadFile(FileDTO request) {
+    public Object uploadFile(FileDTO request) throws NoSuchAlgorithmException {
+        MessageDigest md5 = MessageDigest.getInstance("MD5");
+        byte[] buffer = new byte[1024];
+
         try {
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucket)
                     .object(request.getFile().getOriginalFilename())
                     .stream(request.getFile().getInputStream(), request.getFile().getSize(), -1)
                     .build());
-            /*
-            getInputStream() 대신 bytes[], getSize()대신 contents.length
-            ByteArrayInputStream bis = new ByteArrayInputStream(byte[]);
+            /* getInputStream() 대신 bytes[], getSize()대신 contents.length
+            * ByteArrayInputStream bis = new ByteArrayInputStream(byte[]);
             * */
+
+            /** file에 대한 md5 checksum 생성하여, 같은 값인지 비교 **/
+            md5.update(request.getFile().getInputStream().readAllBytes());
+            buffer = md5.digest();  //해시 코드 생성
+            log.info(buffer.toString()); //[B@2c9e1993
+
+            System.out.println(buffer.toString().equals("[B@2023f20c"));
+
         } catch (Exception e) {
             log.error("Happened error when upload file: ", e);
         }
+
         return FileDTO.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())

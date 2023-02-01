@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
@@ -60,7 +61,7 @@ public class FileController {
 //    }
 
     @PostMapping(value = "/file/upload")
-    public ResponseEntity<Object> upload(@ModelAttribute FileDTO request) {
+    public ResponseEntity<Object> upload(@ModelAttribute FileDTO request) throws NoSuchAlgorithmException {
         return ResponseEntity.ok().body(minioService.uploadFile(request));
     }
 
