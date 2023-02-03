@@ -20,6 +20,7 @@ import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -129,7 +130,6 @@ public class MinioService{
     }**/
 
     public Object uploadFile(FileDTO request) throws NoSuchAlgorithmException {
-        MessageDigest md5 = MessageDigest.getInstance("MD5");
         byte[] buffer = new byte[1024];
 
         try {
@@ -143,11 +143,15 @@ public class MinioService{
             * */
 
             /** file에 대한 md5 checksum 생성하여, 같은 값인지 비교 **/
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
             md5.update(request.getFile().getInputStream().readAllBytes());
             buffer = md5.digest();  //해시 코드 생성
-            log.info(buffer.toString()); //[B@2c9e1993
+            String result = Base64.getEncoder().encodeToString(buffer);
+            log.info(result);
 
-            System.out.println(buffer.toString().equals("[B@2023f20c"));
+            /* 이렇게 하면 오류 난당
+            log.info(buffer.toString()); //[B@2c9e1993
+            System.out.println(buffer.toString().equals("[B@2023f20c"));*/
 
         } catch (Exception e) {
             log.error("Happened error when upload file: ", e);
