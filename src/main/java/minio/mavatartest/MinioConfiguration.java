@@ -38,7 +38,6 @@ public class MinioConfiguration {
         } catch(Exception e){
             throw new RuntimeException(e.getMessage());
             }
-
     }
 
 }
